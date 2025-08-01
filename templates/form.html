@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cybersecurity Controls</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 40px;">
+        <img src="{{ url_for('static', filename='smarthost_logo.png') }}" alt="SmartHost Logo" style="height: 200px;">
+        <h1 style="flex: 1; text-align: center; color: #2c3e50; margin: 0; font-size: 2.2em;">
+        SmartHost Security Portal
+        </h1>
+        <div style="width: 100px;"></div> <!-- spacer to balance the logo -->
+    </div>
+    <h2 style="text-align: center; color: #2c3e50;">Enter Customer ID</h2>
+
+    <form action="/" method="POST">
+        <input type="text" name="customer_id" placeholder="Customer ID" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if error %}
+        <p style="color: red; text-align: center; font-weight: bold;">{{ error }}</p>
+    {% endif %}
+
+    {% if show_create %}
+        <h3>New Customer Details</h3>
+        <form action="/create_customer" method="POST">
+        <!-- <input type="hidden" name="customer_id" value="{{ customer_id }}"> -->
+
+            <!-- Primary Customer Info -->
+            <h4>Primary Contact</h4>
+            <input type="text" name="name" placeholder="Name" required><br>
+            <input type="text" name="title" placeholder="Title"><br>
+            <input type="text" name="company" placeholder="Company"><br>
+            <input type="email" name="email" placeholder="Email" required><br>
+            <input type="text" name="phone" placeholder="Phone"><br>
+            <input type="text" name="address" placeholder="Address"><br><br>
+
+            <!-- Secondary Contact (Optional) -->
+            <h4>Secondary Contact (Optional)</h4>
+            <input type="text" name="contact_name" placeholder="Contact Name"><br>
+            <input type="text" name="contact_title" placeholder="Contact Title"><br>
+            <input type="email" name="contact_email" placeholder="Contact Email"><br>
+            <input type="text" name="contact_phone" placeholder="Contact Phone"><br>
+            <input type="text" name="contact_address" placeholder="Contact Address"><br><br>
+
+            <button type="submit">Create & Continue</button>
+        </form>
+
+    {% elif controls %}
+        <h3>Controls for Customer {{ customer_id }}</h3>
+
+        <form action="/" method="POST">
+            <input type="hidden" name="customer_id" value="{{ customer_id }}">
+            <label for="level">Select Level:</label>
+            <select name="level" required>
+                <option value="Level 1" {% if selected_level == "Level 1" %}selected{% endif %}>Level 1</option>
+                <option value="Level 2" {% if selected_level == "Level 2" %}selected{% endif %}>Level 2</option>
+            </select>
+            <button type="submit">Filter Controls</button>
+        </form>
+
+
+        <form action="/submit" method="POST">
+            <input type="hidden" name="customer_id" value="{{ customer_id }}">
+            {% for row in controls %}
+                <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
+                    <strong>{{ row[0] }}</strong> ({{ row[1] }})<br>
+                    <label><input type="radio" name="status_{{ row[0] }}" value="1" required> Implemented</label>
+                     <label><input type="radio" name="status_{{ row[0] }}" value="2"> Planned</label>
+                    <label><input type="radio" name="status_{{ row[0] }}" value="3"> Not Applicable</label><br>
+                    <textarea name="desc_{{ row[0] }}" placeholder="Discussion..."></textarea>
+                </div>
+            {% endfor %}
+            <button type="submit">Submit</button>
+        </form>
+    {% endif %}
+</body>
+</html>

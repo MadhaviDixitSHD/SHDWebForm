@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Customer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Create New Customer</h2>
+        <form action="/create_customer" method="POST">
+            <!-- Main Customer -->
+            <h3>Primary Customer Info</h3>
+            <label>Customer ID</label>
+            <input type="number" name="CustomerID" required>
+
+            <label>Name</label>
+            <input type="text" name="Name" required>
+
+            <label>Title</label>
+            <input type="text" name="Title">
+
+            <label>Company</label>
+            <input type="text" name="Company">
+
+            <label>Email</label>
+            <input type="email" name="Email">
+
+            <label>Phone</label>
+            <input type="text" name="Phone">
+
+            <label>Address</label>
+            <input type="text" name="Address">
+
+            <!-- Secondary Contact -->
+            <h3>Secondary Contact (Optional)</h3>
+
+            <label>Contact Name</label>
+            <input type="text" name="ContactName">
+
+            <label>Contact Title</label>
+            <input type="text" name="ContactTitle">
+
+            <label>Contact Email</label>
+            <input type="email" name="ContactEmail">
+
+            <label>Contact Phone</label>
+            <input type="text" name="ContactPhone">
+
+            <label>Contact Address</label>
+            <input type="text" name="ContactAddress">
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

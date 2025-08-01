@@ -1,0 +1,102 @@
+:root {
+  --primary-teal: #379682;
+  --dark-gray: #282828;
+  --light-gray-bg: #f5f8fa;
+  --accent-soft: #a3bce8;
+}
+
+body {
+  background: var(--light-gray-bg);
+  color: var(--dark-gray);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  margin: 0; padding: 0;
+}
+
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+h2, h3 {
+  color: var(--primary-teal);
+  text-align: center;
+}
+
+label, input[type="text"], textarea {
+  font-size: 16px;
+}
+
+input[type="text"], input[type="email"], textarea {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0;
+  border: 1px solid var(--accent-soft);
+  border-radius: 6px;
+}
+
+.status-options label {
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+button {
+  width: 100%;
+  background: var(--primary-teal);
+  color: white;
+  font-size: 16px;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--dark-gray);
+}
+
+textarea {
+  margin-top: 6px;
+  min-height: 60px;
+  border: 1px solid var(--accent-soft);
+}
+
+.success-message {
+  color: green;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.header-brand {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-brand h1 {
+    font-size: 28px;
+    color: #368a78;
+    margin: 0;
+}
+
+.header-brand h2 {
+    font-size: 22px;
+    color: #368a78;
+    margin-top: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #005baa;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #004080;
+}
