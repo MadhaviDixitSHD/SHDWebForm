@@ -5,10 +5,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <div class="container">
     <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 40px;">
         <img src="{{ url_for('static', filename='smarthost_logo.png') }}" alt="SmartHost Logo" style="height: 200px;">
         <h1 style="flex: 1; text-align: center; color: #2c3e50; margin: 0; font-size: 2.2em;">
-        SmartHost Security Portal
+        Smarthost CMMC Assisment Portal
         </h1>
         <div style="width: 100px;"></div> <!-- spacer to balance the logo -->
     </div>
@@ -16,7 +17,10 @@
 
     <form action="/" method="POST">
         <input type="text" name="customer_id" placeholder="Customer ID" required>
-        <button type="submit">Search</button>
+        
+        <div class="button-container">
+                <button type="submit" class="action-button">Search</button>
+        </div>
     </form>
 
     {% if error %}
@@ -45,36 +49,49 @@
             <input type="text" name="contact_phone" placeholder="Contact Phone"><br>
             <input type="text" name="contact_address" placeholder="Contact Address"><br><br>
 
-            <button type="submit">Create & Continue</button>
+            <div style="text-align: center;">
+                <button type="submit" style="background-color: #005aa7; color: white; padding: 10px 20px; border: none; border-radius: 4px;">Create & Continue</button>
+            </div>
         </form>
 
     {% elif controls %}
-        <h3>Controls for Customer {{ customer_id }}</h3>
+        <h3>Controls for {{ company_name }} (Customer ID: {{ customer_id }})</h3>
 
-        <form action="/" method="POST">
+        <form action="/" method="POST" style="margin-bottom: 20px;">
             <input type="hidden" name="customer_id" value="{{ customer_id }}">
             <label for="level">Select Level:</label>
             <select name="level" required>
                 <option value="Level 1" {% if selected_level == "Level 1" %}selected{% endif %}>Level 1</option>
                 <option value="Level 2" {% if selected_level == "Level 2" %}selected{% endif %}>Level 2</option>
             </select>
-            <button type="submit">Filter Controls</button>
+            <div style="text-align: center; margin-top: 10px;">
+                <button type="submit" style="background-color: #005aa7; color: white; padding: 10px 20px; border: none; border-radius: 4px;">Filter Controls</button>
+            </div>
         </form>
 
 
         <form action="/submit" method="POST">
             <input type="hidden" name="customer_id" value="{{ customer_id }}">
             {% for row in controls %}
-                <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px;">
-                    <strong>{{ row[0] }}</strong> ({{ row[1] }})<br>
-                    <label><input type="radio" name="status_{{ row[0] }}" value="1" required> Implemented</label>
-                     <label><input type="radio" name="status_{{ row[0] }}" value="2"> Planned</label>
-                    <label><input type="radio" name="status_{{ row[0] }}" value="3"> Not Applicable</label><br>
-                    <textarea name="desc_{{ row[0] }}" placeholder="Discussion..."></textarea>
+                <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+                    <div style="margin-bottom: 8px;">
+                        <strong style="margin-right: 10px;">{{ loop.index }}.</strong>
+                        <strong style="margin-right: 10px;">{{ row[0] }}</strong>
+                        <span>({{ row[1] }})</span>
+                    </div>
+                    {% set status = existing_data.get(row[0], [None])[0] %}
+                    <label><input type="radio" name="status_{{ row[0] }}" value="1" {% if status == 1 %}checked{% endif %}> Implemented</label>
+                    <label><input type="radio" name="status_{{ row[0] }}" value="2" {% if status == 2 %}checked{% endif %}> Not Applicable</label>
+                    <label><input type="radio" name="status_{{ row[0] }}" value="3" {% if status == 3 %}checked{% endif %}> Planned</label>
+                    <textarea name="desc_{{ row[0] }}" placeholder="Discussion...">{{ existing_data.get(row[0], ['', ''])[1] }}</textarea>
                 </div>
             {% endfor %}
-            <button type="submit">Submit</button>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" style="background-color: #005aa7; color: white; padding: 10px 20px; border: none; border-radius: 4px;">Submit</button>
+            </div>
         </form>
-    {% endif %}
+    {% endif %} 
+    </div>
+
 </body>
 </html>

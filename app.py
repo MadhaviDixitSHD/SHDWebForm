@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect
 import pyodbc
+import re
 
 app = Flask(__name__)
 
@@ -24,6 +25,8 @@ def index():
     customer_id = None
     error = None
     customer = None  
+    company_name = None
+    existing_data = {}
 
     if request.method == 'POST':
         customer_id = request.form['customer_id']
@@ -33,24 +36,44 @@ def index():
         cursor = conn.cursor()
 
         # Check if customer exists
-        cursor.execute("SELECT * FROM Customers WHERE CustomerID = ?", (customer_id,))
+        cursor.execute("SELECT Company FROM Customers WHERE CustomerID = ?", (customer_id,))
         customer = cursor.fetchone()
+        company_name = customer[0] if customer else None
 
         if customer:
             # Fetch controls based on selected level
-            cursor.execute("""
-                SELECT Identifier, SecurityRequirement 
-                FROM vw_ControlWithLevels
-                WHERE LevelName = ?
-            """, (selected_level,))
+            if selected_level == 'Level 1':
+                cursor.execute("""
+                    SELECT Identifier, SecurityRequirement, Discussion
+                    FROM vw_ControlWithLevels
+                    WHERE LevelName = 'Level 1'
+                    ORDER BY CAST(PARSENAME(Identifier, 1) AS INT)
+                """)
+            elif selected_level == 'Level 2':
+                cursor.execute("""
+                    SELECT Identifier, SecurityRequirement, Discussion
+                    FROM vw_ControlWithLevels
+                    WHERE LevelName IN ('Level 1', 'Level 2')
+                    ORDER BY CAST(PARSENAME(Identifier, 1) AS INT)
+                """)
             controls = cursor.fetchall()
+
+            def parse_identifier(identifier):
+                return [int(x) for x in re.findall(r'\d+', identifier)]
+
+            controls.sort(key=lambda row: parse_identifier(row[0]))
+
         else:
             error = "Customer ID not found. Please create a new customer."
             show_create = True
 
+        cursor.execute("""SELECT Identifier, StatusID, Discussion FROM ControlCustomerMapping WHERE CustomerID = ?
+        """, (customer_id,))
+        existing_data = {row[0]: (row[1], row[2]) for row in cursor.fetchall()}    
+
         conn.close()
 
-    return render_template('form.html', controls=controls, customer_id=customer_id, show_create=show_create, selected_level=selected_level if customer else None, error=error if not customer else None)
+    return render_template('form.html', controls=controls, customer_id=customer_id, show_create=show_create, selected_level=selected_level if customer else None, error=error if not customer else None, company_name=company_name, existing_data=existing_data)
 
 @app.route('/create_customer', methods=['POST'])
 def create_customer():
@@ -104,13 +127,24 @@ def submit():
             identifier = key.replace('status_', '')  # Extract Identifier
             status_id = int(request.form[key])
             discussion = request.form.get(f'desc_{identifier}', '')
-            #control_id = key.replace('status_', '')
-            #status = request.form[key]
-            #discussion = request.form.get(f'desc_{control_id}', '')
 
             cursor.execute("""
-                INSERT INTO ControlCustomerMapping (Identifier, CustomerID, StatusID, Discussion)
-                VALUES (?, ?, ?, ?)""", (identifier, customer_id, status_id, discussion))
+                IF EXISTS (
+                    SELECT 1 FROM ControlCustomerMapping
+                    WHERE Identifier = ? AND CustomerID = ?
+                )
+                BEGIN
+                    UPDATE ControlCustomerMapping
+                    SET StatusID = ?, Discussion = ?
+                    WHERE Identifier = ? AND CustomerID = ?
+                END
+                ELSE
+                BEGIN
+                    INSERT INTO ControlCustomerMapping (Identifier, CustomerID, StatusID, Discussion)
+                    VALUES (?, ?, ?, ?)
+                    END
+            """, (identifier, customer_id, status_id, discussion, identifier, customer_id, identifier, customer_id, status_id, discussion))
+
 
     conn.commit()
     conn.close()
